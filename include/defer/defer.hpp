@@ -1,7 +1,6 @@
 #ifndef DEFER_INCLUDE_DEFER_DEFER_H
 #define DEFER_INCLUDE_DEFER_DEFER_H
 
-#include <cstdio>
 #include <utility>
 
 template <typename Func>
