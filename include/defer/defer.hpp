@@ -29,10 +29,8 @@ public:
 
   ~DeferredCallback() noexcept { callback(); }
 
-  DeferredCallback(DeferredCallback &&other) noexcept
-      : callback(std::move(other.callback)) {}
-
   DeferredCallback(const DeferredCallback &) = delete;
+  DeferredCallback(DeferredCallback&&) = delete;
   DeferredCallback &operator=(const DeferredCallback &) = delete;
   DeferredCallback &operator=(DeferredCallback &&) = delete;
 
