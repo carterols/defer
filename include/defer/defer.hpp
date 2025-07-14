@@ -24,27 +24,32 @@ class DeferredCallback {
                 "Func must be invocable with no arguments.");
 #endif
 public:
-  DeferredCallback(Func &&function) : callback(std::forward<Func>(function)) {}
+  explicit DeferredCallback(Func &&function) noexcept
+      : callback(std::forward<Func>(function)) {}
 
-  ~DeferredCallback() { callback(); }
+  ~DeferredCallback() noexcept { callback(); }
+
+  DeferredCallback(DeferredCallback &&other) noexcept
+      : callback(std::move(other.callback)) {}
+
+  DeferredCallback(const DeferredCallback &) = delete;
+  DeferredCallback &operator=(const DeferredCallback &) = delete;
+  DeferredCallback &operator=(DeferredCallback &&) = delete;
 
 private:
   Func callback;
 };
 
-template <typename Func>
-DeferredCallback<Func> make_deferred_callback(Func &&callback) {
-  return DeferredCallback(std::forward<Func>(callback));
+template <typename Func> [[nodiscard]] auto deferred(Func &&callback) noexcept {
+  return DeferredCallback<std::decay_t<Func>>(std::forward<Func>(callback));
 }
 
 #define DEFER_UNIQUE_NAME(a, b) DEFER_CONCAT(a, b)
 #define DEFER_CONCAT(a, b) a##b
 
 #define defer_inline(code)                                                     \
-  auto DEFER_UNIQUE_NAME(_deferred_, __LINE__) =                               \
-      make_deferred_callback([&] { code });
+  auto DEFER_UNIQUE_NAME(_deferred_, __LINE__) = deferred([&] { code });
 #define defer(func)                                                            \
-  auto DEFER_UNIQUE_NAME(_deferred_, __LINE__) = make_deferred_callback(func);
+  auto DEFER_UNIQUE_NAME(_deferred_, __LINE__) = deferred(func);
 
 #endif
-
